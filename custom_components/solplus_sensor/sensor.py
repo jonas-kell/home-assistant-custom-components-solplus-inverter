@@ -137,6 +137,7 @@ class SOLPLUSInverter:
 
     async def request(self):
         try:
+            _LOGGER.error(requests.get(url=f"http://{self._ip_address}/"))
             r = await self._hass.async_add_executor_job(
                 lambda ip_address: requests.get(url=f"http://{ip_address}/", timeout=2),
                 self._ip_address,
