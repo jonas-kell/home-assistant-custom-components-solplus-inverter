@@ -138,8 +138,13 @@ class SOLPLUSInverter:
     async def request(self):
         try:
             r = await self._hass.async_add_executor_job(
-                target=requests.get, url=f"http://{self._ip_address}/", timeout=2
-            )  #                     ^^ error should not be problematic, this SHOULD be inserted correctly into args
+                (
+                    lambda ip_address: requests.get(
+                        url=f"http://{ip_address}/", timeout=2
+                    )
+                ),
+                self._ip_address,
+            )
         except requests.exceptions.ConnectTimeout:
             return False, {}
 
