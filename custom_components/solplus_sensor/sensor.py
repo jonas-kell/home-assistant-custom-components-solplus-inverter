@@ -23,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback, PlatformNotReady
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import grequests
+import requests
 import itertools
 from typing import Literal
 import typing_extensions
