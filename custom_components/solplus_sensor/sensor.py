@@ -66,7 +66,7 @@ def setup_platform(
         name = device_config[CONF_NAME]
         ip_address = device_config[CONF_IP_ADDRESS]
 
-        inverter = SOLPLUSInverter(device_id, name, ip_address)
+        inverter = SOLPLUSInverter(hass, device_id, name, ip_address)
 
         # Verify that passed in configuration works
         if not inverter.assert_can_connect():
@@ -96,7 +96,8 @@ def setup_platform(
 class SOLPLUSInverter:
     """Controls Connection to SOLPLUS Inverter"""
 
-    def __init__(self, device_id, name, ip_address) -> None:
+    def __init__(self, hass: HomeAssistant, device_id, name, ip_address) -> None:
+        self._hass = hass
         self._device_id = device_id
         self._name = name
         self._ip_address = ip_address
@@ -136,9 +137,9 @@ class SOLPLUSInverter:
 
     async def request(self):
         try:
-            r = requests.get(
-                url=f"http://{self._ip_address}/", timeout=2
-            )  # TODO not really async, but "requests_async" module crashed on home assistant (not locally, do not know why)
+            r = await self._hass.async_add_executor_job(
+                target=requests.get, url=f"http://{self._ip_address}/", timeout=2
+            )  #                     ^^ error should not be problematic, this SHOULD be inserted correctly into args
         except requests.exceptions.ConnectTimeout:
             return False, {}
 
