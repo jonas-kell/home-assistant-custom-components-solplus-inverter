@@ -1,0 +1,14 @@
+{
+    "domain": "solplus_sensor",
+    "name": "SOLPLUS Inverter",
+    "version": "0.0.1",
+    "documentation": "https://github.com/jonas-kell/home-assistant-custom-components-solplus-inverter/README.md",
+    "requirements": ["requests_async"],
+    "dependencies": [],
+    "after_dependencies": [],
+    "codeowners": ["@jonas-kell"],
+    "iot_class": "local_polling",
+    "loggers": [],
+    "issue_tracker": "https://github.com/jonas-kell/home-assistant-custom-components-solplus-inverter/issues",
+    "integration_type": "device"
+}
