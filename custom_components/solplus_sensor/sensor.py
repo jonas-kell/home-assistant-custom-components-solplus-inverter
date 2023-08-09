@@ -66,7 +66,7 @@ async def async_setup_platform(
         name = device_config[CONF_NAME]
         ip_address = device_config[CONF_IP_ADDRESS]
 
-        inverter = SOLPLUSInverter(hass, device_id, name, ip_address)
+        inverter = SOLPLUSInverter(device_id, name, ip_address)
 
         # Verify that passed in configuration works
         if not await inverter.assert_can_connect():
