@@ -23,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback, PlatformNotReady
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import requests
+import grequests
 import itertools
 from typing import Literal
 import typing_extensions
@@ -52,7 +52,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-def setup_platform(
+async def async_setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
     add_entities: AddEntitiesCallback,
@@ -69,7 +69,7 @@ def setup_platform(
         inverter = SOLPLUSInverter(hass, device_id, name, ip_address)
 
         # Verify that passed in configuration works
-        if not inverter.assert_can_connect():
+        if not await inverter.assert_can_connect():
             raise PlatformNotReady(
                 f"Could not connect to SOLPLUS Inverter on ip: {ip_address}"
             )
