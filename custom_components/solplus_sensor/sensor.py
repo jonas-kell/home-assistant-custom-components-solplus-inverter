@@ -138,14 +138,12 @@ class SOLPLUSInverter:
     async def request(self):
         try:
             r = await self._hass.async_add_executor_job(
-                (
-                    lambda ip_address: requests.get(
-                        url=f"http://{ip_address}/", timeout=2
-                    )
-                ),
+                lambda ip_address: requests.get(url=f"http://{ip_address}/", timeout=2),
                 self._ip_address,
             )
+            _LOGGER.error(f"Stuff was returned: {r}")
         except requests.exceptions.ConnectTimeout:
+            _LOGGER.error(f"Timed out")
             return False, {}
 
         if r.status_code != 200:
