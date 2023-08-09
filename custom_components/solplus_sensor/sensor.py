@@ -23,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback, PlatformNotReady
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import requests
+import aiohttp
 import itertools
 from typing import Literal
 import typing_extensions
@@ -96,8 +96,7 @@ async def async_setup_platform(
 class SOLPLUSInverter:
     """Controls Connection to SOLPLUS Inverter"""
 
-    def __init__(self, hass: HomeAssistant, device_id, name, ip_address) -> None:
-        self._hass = hass
+    def __init__(self, device_id, name, ip_address) -> None:
         self._device_id = device_id
         self._name = name
         self._ip_address = ip_address
@@ -137,23 +136,22 @@ class SOLPLUSInverter:
 
     async def request(self):
         try:
-            _LOGGER.error(requests.get(url=f"http://{self._ip_address}/"))
-            r = await self._hass.async_add_executor_job(
-                lambda ip_address: requests.get(url=f"http://{ip_address}/", timeout=2),
-                self._ip_address,
-            )
-            _LOGGER.error(f"Stuff was returned: {r}")
-        except requests.exceptions.ConnectTimeout:
-            _LOGGER.error(f"Timed out")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"http://{self._ip_address}/", timeout=2
+                ) as resp:
+                    status_code = resp.status
+                    text = await resp.text()
+        except aiohttp.ServerTimeoutError:
             return False, {}
 
-        if r.status_code != 200:
+        if status_code != 200:
             _LOGGER.error(
-                f"Could connect to Inverter but returned status code {r.status_code}"
+                f"Could connect to Inverter but returned status code {status_code}"
             )
             return False, {}
 
-        return self.parseHTML(html=r.text)
+        return self.parseHTML(html=text)
 
     def parseHTML(self, html: str):
         response = {
