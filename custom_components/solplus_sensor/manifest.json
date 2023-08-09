@@ -3,7 +3,7 @@
     "name": "SOLPLUS Inverter",
     "version": "0.0.1",
     "documentation": "https://github.com/jonas-kell/home-assistant-custom-components-solplus-inverter/README.md",
-    "requirements": ["requests_async", "httpcore[http2]"],
+    "requirements": [],
     "dependencies": [],
     "after_dependencies": [],
     "codeowners": ["@jonas-kell"],

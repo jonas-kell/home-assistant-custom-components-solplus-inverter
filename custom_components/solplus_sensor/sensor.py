@@ -23,7 +23,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback, PlatformNotReady
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import requests_async as requests
+import requests
 import itertools
 from typing import Literal
 import typing_extensions
@@ -136,7 +136,9 @@ class SOLPLUSInverter:
 
     async def request(self):
         try:
-            r = await requests.get(url=f"http://{self._ip_address}/", timeout=2)
+            r = requests.get(
+                url=f"http://{self._ip_address}/", timeout=2
+            )  # TODO not really async, but "requests_async" module crashed on home assistant (not locally, do not know why)
         except requests.exceptions.ConnectTimeout:
             return False, {}
 
