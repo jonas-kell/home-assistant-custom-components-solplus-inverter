@@ -27,7 +27,7 @@ import aiohttp
 import itertools
 from typing import Literal
 import typing_extensions
-from datetime import datetime, date, timedelta
+from datetime import datetime, time, timedelta
 import re
 
 _LOGGER = logging.getLogger(__name__)
@@ -259,30 +259,20 @@ class InverterSensor(RestoreSensor):
     @property
     def native_value(self):
         if self._sensor_type == "energy":
-            if (
-                self._store_last_reset < self.last_reset
-            ):  # new day. reset energy at 00:00 o'clock
+            start_time = time(23, 0)  # 11:00 PM
+            end_time = time(3, 0)  # 3:00 AM
+
+            current_time = datetime.now().time()
+
+            if is_time_in_range(
+                start_time, end_time, current_time
+            ):  # new day. reset energy between 11:00 PM and 3:00 AM (it is a sloar panel, no energy is generated ath these times)
                 self._native_value = 0
-                self._store_last_reset = self.last_reset
         return self._native_value
 
     @property
     def last_reset(self):
-        if self._sensor_type == "energy":
-            return datetime.combine(
-                date.today(), datetime.min.time()
-            )  # "TOTAL_INCREASING" Sensor
-
-        return datetime.now()  # "MEASUREMENT" Sensors
-
-    @property
-    def last_reset_helper(self):
-        if self._sensor_type == "energy":
-            return datetime.combine(
-                date.today(), datetime.min.time()
-            )  # "TOTAL_INCREASING" Sensor
-
-        return datetime.now()  # "MEASUREMENT" Sensors
+        return None  # only "TOTAL" needs this set (no such value here, only "TOTAL_INCREASING" and "MEASURMENT")
 
     async def async_update(self):
         is_fresh_value, measurement = await self._inverter.get_values()
@@ -292,12 +282,9 @@ class InverterSensor(RestoreSensor):
             if (
                 last_sensor_data := await self.async_get_last_sensor_data()
             ) is not None:
-                self._store_last_reset = (
-                    last_sensor_data.last_reset
-                )  #                     ^^ error should not be problematic, this SHOULD be there
                 self._native_value = last_sensor_data.native_value
                 _LOGGER.info(
-                    f"Loaded sensor state value for {self._device_id} {self._sensor_type} {last_sensor_data.last_reset, last_sensor_data.native_value, last_sensor_data.last_reset_helper}"
+                    f"Loaded sensor state value for {self._device_id} {self._sensor_type}: {self._native_value}"
                 )
             self._has_loaded_once = True
 
@@ -309,5 +296,14 @@ class InverterSensor(RestoreSensor):
             case "power":
                 self._native_value = measurement["power"]
             case "energy":
-                if is_fresh_value:
+                if (
+                    is_fresh_value
+                ):  # ONLY if the value is fresh from the source, update it. Otherwise, a 0 default could be logged if inverter goes offline, then contunies, causing a reset in "TOTAL_INCREASING" where really none happened
                     self._native_value = measurement["energy"]
+
+
+def is_time_in_range(start, end, time_to_check):
+    if start <= end:
+        return start <= time_to_check <= end
+    else:
+        return start <= time_to_check or time_to_check <= end
