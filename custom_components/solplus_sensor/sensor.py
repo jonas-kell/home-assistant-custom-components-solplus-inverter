@@ -147,7 +147,7 @@ class SOLPLUSInverter:
                         text = ""
         except Exception as ex:
             if (
-                True
+                False
             ):  # switch to error-log connection issues (debug connection issues on live deployment)
                 _LOGGER.error(
                     f"Could not connect to Inverter because of  {type(ex).__name__}, {str(ex.args)}"
