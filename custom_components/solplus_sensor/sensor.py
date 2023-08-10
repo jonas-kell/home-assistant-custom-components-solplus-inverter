@@ -230,8 +230,6 @@ class InverterSensor(RestoreSensor):
 
         self._native_value = None
 
-        self._has_loaded_once = False  # for RestoreSensor features
-
         self._attr_suggested_display_precision = 0
         match self._sensor_type:
             case "energy":
@@ -276,17 +274,6 @@ class InverterSensor(RestoreSensor):
     async def async_update(self):
         is_fresh_value, measurement = await self._inverter.get_values()
 
-        if not self._has_loaded_once:
-            # reset state from memory. Only important for if meter is not reachable and `sensor_type` == "energy"
-            if (
-                last_sensor_data := await self.async_get_last_sensor_data()
-            ) is not None:
-                self._native_value = last_sensor_data.native_value
-                _LOGGER.info(
-                    f"Loaded sensor state value for {self._device_id} {self._sensor_type}: {self._native_value}"
-                )
-            self._has_loaded_once = True
-
         match self._sensor_type:
             case "dc_voltage":
                 self._native_value = measurement["dc_voltage"]
@@ -299,6 +286,15 @@ class InverterSensor(RestoreSensor):
                     is_fresh_value
                 ):  # ONLY if the value is fresh from the source, update it. Otherwise, a 0 default could be logged if inverter goes offline, then contunies, causing a reset in "TOTAL_INCREASING" where really none happened
                     self._native_value = measurement["energy"]
+
+    async def async_added_to_hass(self) -> None:
+        """Restore native_value on reload"""
+        await super().async_added_to_hass()
+        if (last_sensor_data := await self.async_get_last_sensor_data()) is not None:
+            self._native_value = last_sensor_data.native_value
+            _LOGGER.info(
+                f"After re-adding, loaded sensor state value for {self._device_id} {self._sensor_type}: {self._native_value}"
+            )
 
 
 def is_time_in_range(start, end, time_to_check):
