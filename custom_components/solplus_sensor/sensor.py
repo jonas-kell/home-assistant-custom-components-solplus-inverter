@@ -228,8 +228,7 @@ class InverterSensor(RestoreSensor):
         self._name = inverter._name + " " + self.name_additions[sensor_type]
         self._sensor_type = sensor_type
 
-        self._native_value = 0
-        self._store_last_reset = datetime.min
+        self._native_value = None
 
         self._has_loaded_once = False  # for RestoreSensor features
 
