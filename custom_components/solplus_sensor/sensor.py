@@ -69,7 +69,7 @@ async def async_setup_platform(
         inverter = SOLPLUSInverter(device_id, name, ip_address)
 
         # Verify that passed in configuration works
-        if not await inverter.assert_can_connect():
+        if not (await inverter.assert_can_connect()):
             raise PlatformNotReady(
                 f"Could not connect to SOLPLUS Inverter on ip: {ip_address}"
             )
