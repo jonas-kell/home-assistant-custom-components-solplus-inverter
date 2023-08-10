@@ -138,11 +138,20 @@ class SOLPLUSInverter:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"http://{self._ip_address}/", timeout=2
+                    f"http://{self._ip_address}/", timeout=1
                 ) as resp:
                     status_code = resp.status
-                    text = await resp.text()
-        except aiohttp.ServerTimeoutError:
+                    if status_code == 200:
+                        text = await resp.text()
+                    else:
+                        text = ""
+        except Exception as ex:
+            if (
+                True
+            ):  # switch to error-log connection issues (debug connection issues on live deployment)
+                _LOGGER.error(
+                    f"Could not connect to Inverter because of  {type(ex).__name__}, {str(ex.args)}"
+                )
             return False, {}
 
         if status_code != 200:
