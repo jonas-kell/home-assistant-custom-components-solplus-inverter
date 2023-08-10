@@ -238,19 +238,19 @@ class InverterSensor(RestoreSensor):
             case "energy":
                 self._attr_device_class = SensorDeviceClass.ENERGY
                 self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-                self.attr_native_unit_of_measurement = kWh
+                self._attr_native_unit_of_measurement = kWh
             case "dc_voltage":
                 self._attr_device_class = SensorDeviceClass.VOLTAGE
                 self._attr_state_class = SensorStateClass.MEASUREMENT
-                self.attr_native_unit_of_measurement = VOLT
+                self._attr_native_unit_of_measurement = VOLT
             case "ac_voltage":
                 self._attr_device_class = SensorDeviceClass.VOLTAGE
                 self._attr_state_class = SensorStateClass.MEASUREMENT
-                self.attr_native_unit_of_measurement = VOLT
+                self._attr_native_unit_of_measurement = VOLT
             case "power":
                 self._attr_device_class = SensorDeviceClass.POWER
                 self._attr_state_class = SensorStateClass.MEASUREMENT
-                self.attr_native_unit_of_measurement = WATT
+                self._attr_native_unit_of_measurement = WATT
 
     @property
     def name(self) -> str:
@@ -264,11 +264,19 @@ class InverterSensor(RestoreSensor):
             ):  # new day. reset energy at 00:00 o'clock
                 self._native_value = 0
                 self._store_last_reset = self.last_reset
-
         return self._native_value
 
     @property
     def last_reset(self):
+        if self._sensor_type == "energy":
+            return datetime.combine(
+                date.today(), datetime.min.time()
+            )  # "TOTAL_INCREASING" Sensor
+
+        return datetime.now()  # "MEASUREMENT" Sensors
+
+    @property
+    def last_reset_helper(self):
         if self._sensor_type == "energy":
             return datetime.combine(
                 date.today(), datetime.min.time()
@@ -288,6 +296,9 @@ class InverterSensor(RestoreSensor):
                     last_sensor_data.last_reset
                 )  #                     ^^ error should not be problematic, this SHOULD be there
                 self._native_value = last_sensor_data.native_value
+                _LOGGER.info(
+                    f"Loaded sensor state value for {self._device_id} {self._sensor_type} {last_sensor_data.last_reset, last_sensor_data.native_value, last_sensor_data.last_reset_helper}"
+                )
             self._has_loaded_once = True
 
         match self._sensor_type:
