@@ -62,12 +62,12 @@ async def async_setup_platform(
 ) -> None:
     # Assign configuration variables.
     # The configuration check takes care they are present.
+    log_http_errors = config[CONF_LOG_HTTP_ERRORS]
 
     devices = []
     for device_id, device_config in config[CONF_DEVICES].items():
         name = device_config[CONF_NAME]
         ip_address = device_config[CONF_IP_ADDRESS]
-        log_http_errors = device_config[CONF_LOG_HTTP_ERRORS]
 
         inverter = SOLPLUSInverter(device_id, name, ip_address, log_http_errors)
 
