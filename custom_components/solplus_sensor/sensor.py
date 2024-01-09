@@ -181,29 +181,25 @@ class SOLPLUSInverter:
             if result is None:
                 _LOGGER.error(f"HTML was recieved, but HTML parsing failed.")
                 return False, {}
-            response["energy"] = int(result.group(1).replace(".", "").replace(",", ""))
+            response["energy"] = int(float(result.group(1).replace(",", ".")))
 
             result = re.search(r"<b>Leistung AC:\s*([\d.,]+)\s*Watt<\/b>", html)
             if result is None:
                 _LOGGER.error(f"HTML was recieved, but HTML parsing failed.")
                 return False, {}
-            response["power"] = int(result.group(1).replace(".", "").replace(",", ""))
+            response["power"] = int(float(result.group(1).replace(",", ".")))
 
             result = re.search(r"<b>Netzspannung:\s*([\d.,]+)\s*Volt<\/b>", html)
             if result is None:
                 _LOGGER.error(f"HTML was recieved, but HTML parsing failed.")
                 return False, {}
-            response["ac_voltage"] = int(
-                result.group(1).replace(".", "").replace(",", "")
-            )
+            response["ac_voltage"] = int(float(result.group(1).replace(",", ".")))
 
             result = re.search(r"<b>Gleichspannung:\s*([\d.,]+)\s*Volt<\/b>", html)
             if result is None:
                 _LOGGER.error(f"HTML was recieved, but HTML parsing failed.")
                 return False, {}
-            response["dc_voltage"] = int(
-                result.group(1).replace(".", "").replace(",", "")
-            )
+            response["dc_voltage"] = int(float(result.group(1).replace(",", ".")))
         except Exception as ex:
             _LOGGER.error(
                 f"HTML parsing failed due to exception {type(ex).__name__}, {str(ex.args)}"
