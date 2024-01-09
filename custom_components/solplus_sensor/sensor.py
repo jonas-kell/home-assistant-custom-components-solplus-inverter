@@ -33,6 +33,7 @@ import re
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN: Final = "solplus_sensor"
+CONF_LOG_HTTP_ERRORS: Final = "log_http_errors"
 VOLT: Final = UnitOfElectricPotential.VOLT
 WATT: Final = UnitOfPower.WATT
 kWh: Final = UnitOfEnergy.KILO_WATT_HOUR
@@ -40,6 +41,7 @@ kWh: Final = UnitOfEnergy.KILO_WATT_HOUR
 # Validation of the user's configuration
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
+        vol.Optional(CONF_LOG_HTTP_ERRORS, default=False): vol.Boolean,
         vol.Optional(CONF_DEVICES, default={}): vol.Schema(
             {
                 cv.string: {
@@ -65,8 +67,9 @@ async def async_setup_platform(
     for device_id, device_config in config[CONF_DEVICES].items():
         name = device_config[CONF_NAME]
         ip_address = device_config[CONF_IP_ADDRESS]
+        log_http_errors = device_config[CONF_LOG_HTTP_ERRORS]
 
-        inverter = SOLPLUSInverter(device_id, name, ip_address)
+        inverter = SOLPLUSInverter(device_id, name, ip_address, log_http_errors)
 
         # Verify that passed in configuration works
         if not (await inverter.assert_can_connect()):
@@ -96,10 +99,11 @@ async def async_setup_platform(
 class SOLPLUSInverter:
     """Controls Connection to SOLPLUS Inverter"""
 
-    def __init__(self, device_id, name, ip_address) -> None:
+    def __init__(self, device_id, name, ip_address, log_http_errors) -> None:
         self._device_id = device_id
         self._name = name
         self._ip_address = ip_address
+        self._log_http_errors = log_http_errors
         self._last_updated_at = datetime.min
         self._values = {
             "energy": 0,
@@ -147,7 +151,7 @@ class SOLPLUSInverter:
                         text = ""
         except Exception as ex:
             if (
-                False
+                self._log_http_errors
             ):  # switch to error-log connection issues (debug connection issues on live deployment)
                 _LOGGER.error(
                     f"Could not connect to Inverter because of  {type(ex).__name__}, {str(ex.args)}"
