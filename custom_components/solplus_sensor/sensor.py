@@ -73,8 +73,8 @@ async def async_setup_platform(
 
         # Verify that passed in configuration works
         if not (await inverter.assert_can_connect()):
-            raise PlatformNotReady(
-                f"Could not connect to SOLPLUS Inverter on ip: {ip_address}"
+            _LOGGER.error(
+                f"Could not connect to SOLPLUS Inverter on ip {ip_address} on boot. The integration will keep trying to update the values."
             )
 
         _LOGGER.info(f"appended device")

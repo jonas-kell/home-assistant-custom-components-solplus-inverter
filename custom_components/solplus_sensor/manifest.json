@@ -1,7 +1,7 @@
 {
     "domain": "solplus_sensor",
     "name": "SOLPLUS Inverter",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "documentation": "https://github.com/jonas-kell/home-assistant-custom-components-solplus-inverter/README.md",
     "requirements": [],
     "dependencies": [],
