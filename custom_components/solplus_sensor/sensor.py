@@ -142,7 +142,7 @@ class SOLPLUSInverter:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"http://{self._ip_address}/", timeout=1
+                    f"http://{self._ip_address}/", timeout=3
                 ) as resp:
                     status_code = resp.status
                     if status_code == 200:
