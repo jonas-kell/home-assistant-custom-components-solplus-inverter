@@ -146,7 +146,9 @@ class SOLPLUSInverter:
                 ) as resp:
                     status_code = resp.status
                     if status_code == 200:
-                        text = await resp.text()
+                        text = await resp.text(
+                            encoding="latin_1"
+                        )  # latin1 works for solplus response, so force it.
                     else:
                         text = ""
         except Exception as ex:
