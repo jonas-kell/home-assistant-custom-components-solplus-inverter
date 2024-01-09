@@ -41,7 +41,7 @@ kWh: Final = UnitOfEnergy.KILO_WATT_HOUR
 # Validation of the user's configuration
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Optional(CONF_LOG_HTTP_ERRORS, default=False): vol.Boolean,
+        vol.Optional(CONF_LOG_HTTP_ERRORS, default=False): cv.boolean,
         vol.Optional(CONF_DEVICES, default={}): vol.Schema(
             {
                 cv.string: {
