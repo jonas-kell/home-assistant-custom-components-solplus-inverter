@@ -106,7 +106,7 @@ class SOLPLUSInverter:
         self._log_http_errors = log_http_errors
         self._last_updated_at = datetime.min
         self._values = {
-            "energy": 0,
+            "energy": 0.0,
             "dc_voltage": 0,
             "ac_voltage": 0,
             "power": 0,
@@ -170,7 +170,7 @@ class SOLPLUSInverter:
 
     def parseHTML(self, html: str):
         response = {
-            "energy": 0,
+            "energy": 0.0,
             "dc_voltage": 0,
             "ac_voltage": 0,
             "power": 0,
@@ -181,7 +181,7 @@ class SOLPLUSInverter:
             if result is None:
                 _LOGGER.error(f"HTML was recieved, but HTML parsing failed.")
                 return False, {}
-            response["energy"] = int(float(result.group(1)))  # kWh in w.xyz
+            response["energy"] = float(result.group(1))  # kWh in w.xyz
 
             result = re.search(r"<b>Leistung AC:\s*([\d.,]+)\s*Watt<\/b>", html)
             if result is None:
