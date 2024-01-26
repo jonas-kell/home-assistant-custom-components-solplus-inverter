@@ -1,4 +1,4 @@
-"""Platform for lock integration."""
+"""Platform for sensor integration."""
 from __future__ import annotations
 
 import logging
@@ -65,11 +65,11 @@ async def async_setup_platform(
     log_http_errors = config[CONF_LOG_HTTP_ERRORS]
 
     devices = []
-    for device_id, device_config in config[CONF_DEVICES].items():
+    for unique_id, device_config in config[CONF_DEVICES].items():
         name = device_config[CONF_NAME]
         ip_address = device_config[CONF_IP_ADDRESS]
 
-        inverter = SOLPLUSInverter(device_id, name, ip_address, log_http_errors)
+        inverter = SOLPLUSInverter(unique_id, name, ip_address, log_http_errors)
 
         # Verify that passed in configuration works
         if not (await inverter.assert_can_connect()):
@@ -99,8 +99,8 @@ async def async_setup_platform(
 class SOLPLUSInverter:
     """Controls Connection to SOLPLUS Inverter"""
 
-    def __init__(self, device_id, name, ip_address, log_http_errors) -> None:
-        self._device_id = device_id
+    def __init__(self, unique_id, name, ip_address, log_http_errors) -> None:
+        self._unique_id = unique_id
         self._name = name
         self._ip_address = ip_address
         self._log_http_errors = log_http_errors
@@ -232,7 +232,7 @@ class InverterSensor(RestoreSensor):
     ) -> None:
         """Initialize a Sensor for the inverter"""
         self._inverter = inverter
-        self._device_id = inverter._device_id + "_" + sensor_type
+        self._attr_unique_id = inverter._unique_id + "_" + sensor_type
         self._name = inverter._name + " " + self.name_additions[sensor_type]
         self._sensor_type = sensor_type
 
@@ -301,7 +301,7 @@ class InverterSensor(RestoreSensor):
         if (last_sensor_data := await self.async_get_last_sensor_data()) is not None:
             self._native_value = last_sensor_data.native_value
             _LOGGER.info(
-                f"After re-adding, loaded sensor state value for {self._device_id} {self._sensor_type}: {self._native_value}"
+                f"After re-adding, loaded sensor state value for {self._name} {self._sensor_type}: {self._native_value}"
             )
 
 
